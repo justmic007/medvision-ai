@@ -1,0 +1,16 @@
+services:
+  api:
+    build: .
+    container_name: medvision-api
+    ports:
+      - "8000:8000"
+    environment:
+      # Overrides Settings defaults if present; safe to leave as-is in Phase 0.
+      - APP_NAME=MedVision AI
+    healthcheck:
+      # Uses the real /health endpoint as the container liveness probe.
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0) if urllib.request.urlopen('http://localhost:8000/health').status==200 else sys.exit(1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
