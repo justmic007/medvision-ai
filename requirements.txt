@@ -1,0 +1,12 @@
+# MedVision AI — Phase 0 dependencies
+# Pinned with ~= (compatible release): patch/minor updates allowed, majors held.
+# The heavier imaging stack (torch, torchxrayvision, monai, mlflow) is added in
+# Phase 1/2 to keep the Phase 0 image small and fast to build.
+
+fastapi~=0.141.0
+uvicorn[standard]~=0.52.0
+pydantic-settings~=2.15.0
+
+# --- dev / test ---
+pytest~=8.4.0
+httpx~=0.28.0        # required by fastapi.testclient
