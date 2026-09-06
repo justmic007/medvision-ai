@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# Env
+.env
+.env.local
+
+# Data & model artifacts (public/synthetic only — never committed)
+data/
+weights/
+*.pth
+*.pt
+*.dcm
+
+# MLflow
+mlruns/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# macOS / IDE
+.DS_Store
+.vscode/
+.idea/
