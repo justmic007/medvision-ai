@@ -77,3 +77,58 @@ only operating-point metrics (precision/recall/F1 at the cut) do.
   pass that produced predictions. If Phase 2 discards everything but the numbers,
   Phase 3 has to re-run inference to recover activations. Design for this in
   Phase 2.
+
+**D-08 — Multi-user clinical workflow layer (Phase 6).**
+MedVision expands from a stateless inference API to a clinical system: clinicians
+sign up and see their own persisted cases; an admin oversees users and all cases;
+an audit trail records provenance (who uploaded/reviewed what, when). Rationale:
+makes the clinician-in-the-loop framing demonstrable rather than merely
+conceptual, and signals the ability to build a deployable medical system, not
+just an ML component. Two roles only (admin, clinician); deliberately excludes
+email verification, password reset, granular permissions, org hierarchies —
+scoped as a demonstrable workflow, not a production identity system. Rejected:
+fully stateless (cleaner ML showcase, but reads as a component, not a system).
+
+**D-09 — User layer wraps the ML core; built after it, not before.**
+Dependency order: working pipeline (Phases 1–5) -> persist outputs as cases ->
+accounts around cases. Within Phase 6, persistence comes before auth: first make
+the pipeline persist a case (no auth), then add auth + roles + ownership on top.
+Rationale: the risky, uncertain ML work is done first while energy is freshest;
+the persistence schema is designed against real output shapes rather than guessed
+ones; and the "Phases 0-5 independently demo-able" invariant is preserved.
+
+**D-10 — Store the original scan for case reference; S3-compatible storage.**
+Cases persist the original scan (for later clinical reference, PACS-like), plus
+predictions, the derived GradCAM overlay, retrieved literature, and metadata.
+Storage is S3-compatible object storage: MinIO locally (self-contained, offline,
+no prod credentials in dev) and Cloudflare R2 for deployment (managed, scalable).
+Because both speak the S3 API, moving from local to prod is a configuration swap,
+not a code change. D-03 still holds: scans live in the object store / a runtime
+volume, NEVER committed to the git repo. Scaling and retention (compression,
+lifecycle rules, cold storage, retention-as-data-minimization, preview-vs-full)
+are ops concerns handled at deploy, not code changes — noted as future work, not
+built for the demo. Note: app filesystems can be ephemeral in deployment, so
+storing outside the app container (R2) is deliberate. Rejected: storing only the
+derived heatmap (thinner case history) and fully stateless (no reference image).
+
+**D-11 — Design the ML core for model-pluggability; ship CXR fully; defer other
+modalities.**
+The ML core is built so a model is "something that takes a normalized tensor and
+returns findings + activations," and preprocessing is modality-aware but
+pluggable. This keeps the door open to additional models (e.g. brain-tumor MRI
+segmentation via MONAI) without a rewrite. Only lightweight seams are added now
+(clean naming, a defined model interface, a pluggable preprocessor) — NOT a
+premature plugin/registry framework (YAGNI). One modality (chest X-ray) is
+shipped fully; additional modalities are documented future work, not part of this
+build.
+
+**D-12 — Postgres as the application database (Phase 6).**
+Cases, users, and audit records persist in Postgres, running as a container in
+docker-compose alongside the API and MinIO. Chosen over SQLite for
+production-realism, concurrent-access correctness, and clean containerization.
+Enters the codebase at Phase 6 — Phases 1–5 are stateless, with no application
+database. Distinct from two other stores in the project: MLflow's own tracking
+store (Phase 2, logs experiment runs to mlruns/) and object storage (D-10,
+MinIO/R2, holds scan images). The case schema is designed at Phase 6 against real
+output shapes, not pre-specified now (per D-09). Rejected: SQLite (fine for a
+demo, but weaker concurrency story and weaker portfolio signal).

@@ -1,7 +1,7 @@
 # Architecture
 
 Design-time reference for MedVision AI. The polished portfolio version (with
-final endpoint names and the resolved open picks) is a Phase 7 deliverable; this
+final endpoint names and the resolved open picks) is a Phase 8 deliverable; this
 is the map we build from.
 
 ## System in one line
@@ -12,9 +12,11 @@ API, containerized, non-diagnostic, clinician-in-the-loop.
 
 ## Phase boundaries
 
-Phases 0–5 form a complete, demo-able system with no dependency on the VLM
-layer. Phase 6 (VLM narrative) is optional and sits outside the deterministic
-core. Phase 7 is evaluation, model card, deployment, and portfolio docs.
+Phases 0–5 form a complete, demo-able stateless system. Phase 6 wraps that
+core in a multi-user clinical workflow (admin + clinician, persisted cases, audit
+trail; see D-08/D-09). Phase 7 (VLM narrative) is optional and sits outside the
+deterministic core. Phase 8 is evaluation, model card, deployment, and portfolio
+docs.
 
 | Phase | Deliverable | Runs on |
 |-------|-------------|---------|
@@ -23,9 +25,10 @@ core. Phase 7 is evaluation, model card, deployment, and portfolio docs.
 | 2 | Core inference: TorchXRayVision DenseNet, per-pathology probs, MLflow logging | local CPU |
 | 3 | Explainability (GradCAM) + calibration | local CPU |
 | 4 | Literature RAG via NCBI E-utilities (PubMed) | local CPU |
-| 5 | API + demo UI + lightweight per-pathology eval — complete demo | local CPU |
-| 6 | Optional VLM narrative (LLaVA-Med / CheXagent), constrained by core output | Colab/Kaggle GPU |
-| 7 | Full eval, model card, deployment, portfolio write-up | mixed |
+| 5 | API + demo UI + lightweight per-pathology eval — stateless demo complete | local CPU |
+| 6 | Multi-user clinical workflow: admin/clinician roles, auth, persisted cases (MinIO/R2 scan storage), audit trail | local CPU |
+| 7 | Optional VLM narrative (LLaVA-Med / CheXagent), constrained by core output | Colab/Kaggle GPU |
+| 8 | Full eval, model card, deployment, portfolio write-up | mixed |
 
 ## Tool inventory
 
@@ -55,7 +58,7 @@ Literature grounding (local CPU)
 Experiment tracking (local CPU)
 - MLflow — logs model version, thresholds, timestamp per inference run.
 
-Optional narrative (Colab/Kaggle GPU — Phase 6, outside the core)
+Optional narrative (Colab/Kaggle GPU — Phase 7, outside the core)
 - LLaVA-Med / CheXagent — VLM narrative, constrained by deterministic
   predictions + citations (D-04).
 
