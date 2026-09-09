@@ -132,3 +132,17 @@ store (Phase 2, logs experiment runs to mlruns/) and object storage (D-10,
 MinIO/R2, holds scan images). The case schema is designed at Phase 6 against real
 output shapes, not pre-specified now (per D-09). Rejected: SQLite (fine for a
 demo, but weaker concurrency story and weaker portfolio signal).
+
+**D-13 — Intel-macOS torch ceiling: torch 2.2.2 / torchvision 0.17.2.**
+Development is on an Intel (x86-64) MacBook. PyTorch dropped Intel-macOS wheels
+after the 2.2.x line, so torch tops out at 2.2.2 locally, paired with its
+version-locked partner torchvision 0.17.2. These are pinned exactly (==) in
+requirements.txt. This is a hardware constraint, not a preference — newer torch
+(2.3–2.14+) simply has no Intel-Mac build. It costs MedVision nothing: the core
+is CPU inference on a pretrained model, and everything new in later torch is
+training/GPU/edge features we don't use. torchxrayvision (1.5.4) is permissive
+about torch version and works fine on 2.2.2. GPU-heavy work (Phase 7 VLM) already
+routes to Colab/Kaggle (Linux, current torch), so the one place newer torch would
+matter is already offloaded. Note: an install interrupted by low disk can leave a
+"hollow" torch (metadata present, package empty — `torch.__file__` is None); fix
+is `pip install --force-reinstall --no-cache-dir torch==2.2.2`.
