@@ -10,3 +10,14 @@ pydantic-settings~=2.15.0
 # --- dev / test ---
 pytest~=8.4.0
 httpx~=0.28.0        # required by fastapi.testclient
+
+# --- Phase 1: imaging & preprocessing ---
+# Pinned to the Intel-macOS ceiling: torch tops out at 2.2.2 on x86-64 macOS
+# (no Intel wheels after 2.2.x). torchvision 0.17.2 is its version-locked partner.
+# See DECISIONS.md D-13.
+torch==2.2.2
+torchvision==0.17.2
+torchxrayvision==1.5.4
+pydicom~=3.0
+pillow~=11.0
+numpy~=1.26
