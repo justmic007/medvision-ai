@@ -21,3 +21,6 @@ torchxrayvision==1.5.4
 pydicom~=3.0
 pillow~=11.0
 numpy~=1.26
+
+# --- Phase 2: experiment tracking ---
+mlflow~=2.17
