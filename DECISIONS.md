@@ -146,3 +146,20 @@ routes to Colab/Kaggle (Linux, current torch), so the one place newer torch woul
 matter is already offloaded. Note: an install interrupted by low disk can leave a
 "hollow" torch (metadata present, package empty — `torch.__file__` is None); fix
 is `pip install --force-reinstall --no-cache-dir torch==2.2.2`.
+
+**D-14 — Literature grounding via direct PubMed retrieval; embeddings deferred.**
+Phase 4 grounds each detected finding in cited PubMed literature by querying NCBI
+E-utilities directly (esearch -> article IDs, efetch -> abstracts), rather than
+building a vector store + embeddings. Rationale: PubMed is a mature, biomedically
+indexed search engine; for a well-defined finding-name -> literature mapping,
+using it directly is simpler and more authoritative than reimplementing retrieval
+with embeddings (YAGNI, cf. D-11). This is retrieval + grounding, NOT
+retrieval-augmented *generation* — no generative step in the core; the generative
+"G" is the optional Phase 7 VLM, deliberately fenced off (D-04). Retrieved
+abstracts are cached (keyed by finding): serves retrieval directly (speed, NCBI
+rate-limit friendliness) and seeds a future vector-store corpus for free. A
+vector store (Option B) can slot in later behind the same interface; its corpus
+would come from the cached retrievals or a curated guideline set. Query quality
+depends on a hand-built finding->search-term map (e.g. "Effusion" -> "pleural
+effusion chest radiograph"), which is the real work of this approach. NCBI is
+queried keyless in dev (~3 req/s limit); a free API key (optional) raises it.
