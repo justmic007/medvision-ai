@@ -163,3 +163,14 @@ would come from the cached retrievals or a curated guideline set. Query quality
 depends on a hand-built finding->search-term map (e.g. "Effusion" -> "pleural
 effusion chest radiograph"), which is the real work of this approach. NCBI is
 queried keyless in dev (~3 req/s limit); a free API key (optional) raises it.
+
+**D-15 — Gradio 5.49 for the mounted demo UI; accepts pydantic/starlette downgrade.**
+The self-contained demo UI (mounted at /demo) uses Gradio. Gradio 4.x was
+incompatible with the modern huggingface_hub (1.31) already pulled in by the ML
+stack (missing HfFolder), so Gradio 5.49 is used instead. Installing it
+downgraded pydantic (2.13 -> 2.11) and starlette (1.6 -> 0.52); the full test
+suite (31 passed) confirms FastAPI 0.141 and our code work correctly at those
+versions, so the downgrade is accepted. The demo is scoped to PNG/JPG (Gradio's
+image widget can't preview DICOM); the /analyze API still accepts DICOM (D-06).
+The demo is a convenience surface for this backend repo — the production UI is
+the separate Next.js frontend — so the dependency trade-off is low-stakes.

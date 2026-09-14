@@ -24,3 +24,9 @@ numpy~=1.26
 
 # --- Phase 2: experiment tracking ---
 mlflow~=2.17
+
+# --- Phase 5: file uploads for the /analyze endpoint ---
+python-multipart~=0.0.12
+
+# --- Phase 5: self-contained demo UI (mounted in FastAPI) ---
+gradio~=5.49
