@@ -30,6 +30,18 @@ Phase 0 — scaffolding. Runnable containerized FastAPI skeleton with a real
 `/health` endpoint and a passing test suite. Imaging, explainability, and
 literature layers arrive in Phases 1–5.
 
+## Sample data
+
+Test chest X-rays are public images, not committed to the repo (D-03). Fetch
+them into `data/` with:
+
+```bash
+bash scripts/fetch_sample_data.sh
+```
+
+This downloads a few public, de-identified chest X-rays (from the
+TorchXRayVision test set) for local development and the demo.
+
 ## Quickstart
 
 ### With Docker (primary — D-01)

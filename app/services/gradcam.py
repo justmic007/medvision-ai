@@ -136,3 +136,37 @@ def render_overlay(
     fig.savefig(out_path, bbox_inches="tight", pad_inches=0, dpi=100)
     plt.close(fig)
     return out_path
+
+
+def render_overlay_base64(
+    tensor: torch.Tensor,
+    heatmap: np.ndarray,
+    alpha: float = 0.4,
+) -> str:
+    """Render the overlay to an in-memory PNG and return base64 (no file).
+
+    Same rendering as render_overlay(), but returns a base64-encoded PNG string
+    suitable for embedding in a JSON API response or an <img src="data:..."> —
+    used by the orchestrator / /analyze endpoint (D-14 era: demo returns base64;
+    storage-backed URLs come with the clinical-workflow phase, D-10).
+    """
+    import base64
+    import io
+
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    img = tensor[0, 0].detach().cpu().numpy()
+
+    fig, ax = plt.subplots(figsize=(6, 6))
+    ax.imshow(img, cmap="gray")
+    ax.imshow(heatmap, cmap="jet", alpha=alpha)
+    ax.axis("off")
+
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", bbox_inches="tight", pad_inches=0, dpi=100)
+    plt.close(fig)
+    buf.seek(0)
+    return base64.b64encode(buf.read()).decode("ascii")

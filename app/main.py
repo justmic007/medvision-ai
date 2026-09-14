@@ -6,9 +6,12 @@ and literature layers are added in later phases as additional routers under
 app/api/, backed by logic in app/services/.
 """
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import health
+from app.api import analyze, health
 from app.core.config import get_settings
+from app.demo import build_demo
+import gradio as gr
 
 settings = get_settings()
 
@@ -21,7 +24,19 @@ app = FastAPI(
     ),
 )
 
+# CORS: the frontend is a separate app on a different origin (separate repo),
+# so it must be allowed to call this API from the browser. Permissive in dev;
+# tighten allow_origins to the deployed frontend URL in production.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(health.router)
+app.include_router(analyze.router)
 
 
 @app.get("/", tags=["root"])
@@ -32,3 +47,7 @@ def root() -> dict:
         "disclaimer": settings.disclaimer,
         "docs": "/docs",
     }
+
+
+# Mount the self-contained Gradio demo UI at /demo.
+app = gr.mount_gradio_app(app, build_demo(), path="/demo")

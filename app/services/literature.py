@@ -128,11 +128,21 @@ class PubMedRetriever(LiteratureRetriever):
         return articles
 
     def retrieve(self, finding: str, max_results: int = 3) -> list[Article]:
+        """Retrieve cited references for a finding.
+
+        Network-tolerant: on a request error (timeout, connection failure) this
+        returns an empty list rather than raising, so a PubMed outage degrades
+        gracefully — the caller still gets findings and heatmaps, just without
+        literature for this finding.
+        """
         query = FINDING_QUERIES.get(finding, f"{finding} chest radiograph")
-        pmids = self._esearch(query, max_results)
-        # Be polite to NCBI between the two calls.
-        time.sleep(0.34)
-        return self._efetch(pmids)
+        try:
+            pmids = self._esearch(query, max_results)
+            # Be polite to NCBI between the two calls.
+            time.sleep(0.34)
+            return self._efetch(pmids)
+        except requests.exceptions.RequestException:
+            return []
 
 
 class CachedPubMedRetriever(PubMedRetriever):
